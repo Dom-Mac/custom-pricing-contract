@@ -5,7 +5,7 @@ import "../structs/Product.sol";
 
 import "../interfaces/ISlicer.sol";
 
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 struct SlicerProductInfo {
     CountersUpgradeable.Counter productCounter;
