@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 
-import "src/Contract.sol";
+import "src/AdditionalPrice/AdditionalPrice.sol";
 
-contract TestContract is Test {
-    Contract c;
+contract TestAdditionalPrice is Test {
+    AdditionalPrice a;
 
     function setUp() public {
-        c = new Contract();
+        a = new AdditionalPrice();
     }
 
     function testBar() public {
