@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 
 import "src/AdditionalPrice/AdditionalPrice.sol";
+import "src/AdditionalPrice/structs/CurrenciesParams.sol"
 import { MockProductsModule } from "./mocks/MockProductsModule.sol";
 
 contract TestAdditionalPrice is Test {
@@ -11,6 +12,7 @@ contract TestAdditionalPrice is Test {
   AdditionalPrice additionalPrice;
   uint256 constant slicerId = 0;
   uint256 constant productId = 1;
+  
 
   function setUp() public {
     productsModule = new MockProductsModule();

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import { ISliceProductPrice } from "../Slice/interfaces/utils/ISliceProductPrice.sol";
 import { IProductsModule } from "../Slice/interfaces/IProductsModule.sol";
 import { AdditionalPriceParams } from "./structs/AdditionalPriceParams.sol";
+import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
 import "forge-std/console.sol";
 
 // import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
@@ -28,8 +29,6 @@ contract AdditionalPrice is ISliceProductPrice {
   // Mapping from slicerId to productId to currency to AdditionalPriceParams
   mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
     private _productParams;
-
-  // {slicerId1: {productId1: {0x000: {basePrice: 0x5f, additionalPrices: {0: 0x5d, 1: 0x4f}}}}}
 
   /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
@@ -67,15 +66,20 @@ contract AdditionalPrice is ISliceProductPrice {
 
   function setProductPrice(
     uint256 slicerId,
-    uint256 productId // CurrenciesParams[] memory currenciesParams // onlyProductOwner(slicerId, productId)
+    uint256 productId,
+    CurrenciesParams[] memory currenciesParams
   ) external onlyProductOwner(slicerId, productId) {
     console.log(slicerId, "slicerID");
-    console.log(productId);
+    console.log(productId, "productID");
+    console.log(currenciesParams, "currencies")
+
     // Set currency params
     // for (uint256 i; i < currenciesParams.length; ) {
     //   // Mapping from slicerId to productId to currency to AdditionalPriceParams
     //   // mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
     //   //   private _productParams;
+    //   // {slicerId1: {productId1: {0x000: {basePrice: 0x5f, additionalPrices: {0: 0x5d, 1: 0x4f}}}}}
+
     //   // Set product params
     //   _productParams[slicerId][productId][currenciesParams[i].currency]
     //     .basePrice = currenciesParams[i].basePrice;
