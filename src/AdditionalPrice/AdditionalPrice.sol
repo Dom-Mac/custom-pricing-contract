@@ -67,10 +67,9 @@ contract AdditionalPrice is ISliceProductPrice {
 
   function setProductPrice(
     uint256 slicerId,
-    uint256 productId // CurrenciesParams[] memory currenciesParams
-  ) external // onlyProductOwner(slicerId, productId)
-  {
-    console.log(slicerId);
+    uint256 productId // CurrenciesParams[] memory currenciesParams // onlyProductOwner(slicerId, productId)
+  ) external onlyProductOwner(slicerId, productId) {
+    console.log(slicerId, "slicerID");
     console.log(productId);
     // Set currency params
     // for (uint256 i; i < currenciesParams.length; ) {

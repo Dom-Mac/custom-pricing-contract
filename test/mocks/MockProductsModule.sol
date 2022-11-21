@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
-import "forge-std/console.sol";
 
 contract MockProductsModule {
   function isProductOwner(
@@ -8,8 +7,7 @@ contract MockProductsModule {
     uint256,
     address account
   ) external pure returns (bool isAllowed) {
-    isAllowed = account == address(0);
-    console.log(address(0))
+    isAllowed = account != address(0);
   }
 
   function availableUnits(
