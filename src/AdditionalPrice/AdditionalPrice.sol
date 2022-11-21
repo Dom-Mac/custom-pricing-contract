@@ -4,12 +4,14 @@ pragma solidity ^0.8.0;
 import { ISliceProductPrice } from "../Slice/interfaces/utils/ISliceProductPrice.sol";
 import { IProductsModule } from "../Slice/interfaces/IProductsModule.sol";
 import { AdditionalPriceParams } from "./structs/AdditionalPriceParams.sol";
-import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
+import "forge-std/console.sol";
+
+// import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
 
 /// @title Adjust product price based on custom input - Slice pricing strategy
 /// @author jj-ranalli
-/// @author Dom-Mac 
-/// @notice 
+/// @author Dom-Mac
+/// @notice
 /// - On product creation the creator can choose different inputs and associated additional prices
 /// - Inherits `ISliceProductPrice` interface
 /// - Constructor logic sets Slice contract addresses in storage
@@ -17,7 +19,7 @@ import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
 /// of this contract
 /// - Adds onlyProductOwner modifier used to verify sender's permissions on Slice before setting product params
 
-contract AdditionalPrice is ISliceProductPrice { 
+contract AdditionalPrice is ISliceProductPrice {
   /*//////////////////////////////////////////////////////////////
                                 STORAGE
   //////////////////////////////////////////////////////////////*/
@@ -26,6 +28,8 @@ contract AdditionalPrice is ISliceProductPrice {
   // Mapping from slicerId to productId to currency to AdditionalPriceParams
   mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
     private _productParams;
+
+  // {slicerId1: {productId1: {0x000: {basePrice: 0x5f, additionalPrices: {0: 0x5d, 1: 0x4f}}}}}
 
   /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
@@ -53,7 +57,6 @@ contract AdditionalPrice is ISliceProductPrice {
     _;
   }
 
-
   /*//////////////////////////////////////////////////////////////
                 ADDITIONAL PRICE ON CUSTOM INPUTS
     //////////////////////////////////////////////////////////////*/
@@ -61,37 +64,34 @@ contract AdditionalPrice is ISliceProductPrice {
   /// @notice Set customInputId and AdditionalPrice for product.
   /// @param slicerId ID of the slicer to set the price params for.
   /// @param productId ID of the product to set the price params for.
-  /// @param currencies currencies of the product to set the price params for.
-  /// @param customInputIds ID of the custom input to set the price params for.
-  /// @param additionalPrices amount to be added add to 
-  /// @param basePrice amount to be added add to 
 
   function setProductPrice(
     uint256 slicerId,
-    uint256 productId,
-    CurrenciesParams[] currenciesParams
-  ) external onlyProductOwner(slicerId, productId) {
+    uint256 productId // CurrenciesParams[] memory currenciesParams
+  ) external // onlyProductOwner(slicerId, productId)
+  {
+    console.log(slicerId);
+    console.log(productId);
     // Set currency params
-    for (uint256 i; i < currenciesParams.length; ) {
-      // Mapping from slicerId to productId to currency to AdditionalPriceParams
-      // mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
-      //   private _productParams;
-
-      // Set product params
-      _productParams[slicerId][productId][currenciesParams[i].currency].basePrice = currenciesParams[i].basePrice;
-      _productParams[slicerId][productId][currenciesParams[i].currency].additionalPrices[] = currenciesParams.basePrice;
-
-      unchecked {
-        ++i;
-      }
-    }
+    // for (uint256 i; i < currenciesParams.length; ) {
+    //   // Mapping from slicerId to productId to currency to AdditionalPriceParams
+    //   // mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
+    //   //   private _productParams;
+    //   // Set product params
+    //   _productParams[slicerId][productId][currenciesParams[i].currency]
+    //     .basePrice = currenciesParams[i].basePrice;
+    //   // _productParams[slicerId][productId][currenciesParams[i].currency].additionalPrices[] = currenciesParams.basePrice;
+    //   unchecked {
+    //     ++i;
+    //   }
+    // }
   }
 
   /*//////////////////////////////////////////////////////////////
               CUSTOM ADDITIONAL PRICE 
   //////////////////////////////////////////////////////////////*/
 
-   /**
+  /**
    * @notice Function called by Slice protocol to calculate current product price.
    * @param slicerId ID of the slicer being queried
    * @param productId ID of the product being queried
@@ -106,8 +106,5 @@ contract AdditionalPrice is ISliceProductPrice {
     uint256 quantity,
     address,
     bytes memory
-  ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
-    // Add reference for product and pricing params
-
-  }
+  ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {}
 }
