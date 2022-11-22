@@ -7,7 +7,7 @@ contract MockProductsModule {
     uint256,
     address account
   ) external pure returns (bool isAllowed) {
-    isAllowed = true
+    isAllowed = true;
   }
 
   function availableUnits(

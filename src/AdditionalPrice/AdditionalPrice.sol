@@ -5,7 +5,9 @@ import { ISliceProductPrice } from "../Slice/interfaces/utils/ISliceProductPrice
 import { IProductsModule } from "../Slice/interfaces/IProductsModule.sol";
 import { AdditionalPriceParams } from "./structs/AdditionalPriceParams.sol";
 import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
-import "forge-std/console.sol";
+// import { console } from "forge-std/console.sol";
+
+import { console } from "lib/forge-std/src/console.sol";
 
 // import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
 
@@ -69,25 +71,31 @@ contract AdditionalPrice is ISliceProductPrice {
     uint256 productId,
     CurrenciesParams[] memory currenciesParams
   ) external onlyProductOwner(slicerId, productId) {
-    console.log(slicerId, "slicerID");
-    console.log(productId, "productID");
-    console.log(currenciesParams, "currencies")
-
     // Set currency params
-    // for (uint256 i; i < currenciesParams.length; ) {
-    //   // Mapping from slicerId to productId to currency to AdditionalPriceParams
-    //   // mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
-    //   //   private _productParams;
-    //   // {slicerId1: {productId1: {0x000: {basePrice: 0x5f, additionalPrices: {0: 0x5d, 1: 0x4f}}}}}
+    for (uint256 i; i < currenciesParams.length; ) {
+      // Mapping from slicerId to productId to currency to AdditionalPriceParams
+      // mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
+      //   private _productParams;
 
-    //   // Set product params
-    //   _productParams[slicerId][productId][currenciesParams[i].currency]
-    //     .basePrice = currenciesParams[i].basePrice;
-    //   // _productParams[slicerId][productId][currenciesParams[i].currency].additionalPrices[] = currenciesParams.basePrice;
-    //   unchecked {
-    //     ++i;
-    //   }
-    // }
+      // Set product params
+      _productParams[slicerId][productId][currenciesParams[i].currency]
+        .basePrice = currenciesParams[i].basePrice;
+
+      for (uint256 j; j < currenciesParams[i].additionalPrices.length; ) {
+        _productParams[slicerId][productId][currenciesParams[i].currency]
+          .additionalPrices[
+            currenciesParams[i].additionalPrices[j].customInputId
+          ] = currenciesParams[i].additionalPrices[j].additionalPrice;
+
+        unchecked {
+          ++j;
+        }
+      }
+
+      unchecked {
+        ++i;
+      }
+    }
   }
 
   /*//////////////////////////////////////////////////////////////
@@ -109,5 +117,12 @@ contract AdditionalPrice is ISliceProductPrice {
     uint256 quantity,
     address,
     bytes memory
-  ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {}
+  ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
+    // Set ethPrice or currencyPrice based on chosen currency
+    if (currency == address(0)) {
+      ethPrice = 0;
+    } else {
+      currencyPrice = 1;
+    }
+  }
 }

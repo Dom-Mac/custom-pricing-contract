@@ -5,7 +5,7 @@ import { CurrencyAdditionalParams } from "./CurrencyAdditionalParams.sol";
 
 /// @param currency currency address for a product
 /// @param basePrice base price for a currency
-/// @param additionalPrices mapping from customInputId to additionalPrice
+/// @param additionalPrices array of CurrencyAdditionalParams
 
 struct CurrenciesParams {
   address currency;
