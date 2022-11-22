@@ -116,13 +116,22 @@ contract AdditionalPrice is ISliceProductPrice {
     address currency,
     uint256 quantity,
     address,
-    bytes memory
+    bytes memory data
   ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
+    uint256 basePrice = _productParams[slicerId][productId][currency].basePrice;
+    // TODO fix [0]
+    uint256 additionalPrice = _productParams[slicerId][productId][currency]
+      .additionalPrices[0];
+
+    console.log(basePrice);
+    console.log(additionalPrice);
+    console.logBytes(data);
+
     // Set ethPrice or currencyPrice based on chosen currency
     if (currency == address(0)) {
-      ethPrice = 0;
+      ethPrice = quantity * basePrice + additionalPrice;
     } else {
-      currencyPrice = 1;
+      currencyPrice = quantity * basePrice + additionalPrice;
     }
   }
 }

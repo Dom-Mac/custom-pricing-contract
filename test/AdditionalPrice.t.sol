@@ -14,34 +14,60 @@ uint256 constant productId = 1;
 contract TestAdditionalPrice is Test {
   MockProductsModule productsModule;
   AdditionalPrice additionalPrice;
+  address _eth = address(0);
+  uint256 _basePrice = 1000;
+  uint256 _inputZeroAddAmount = 100;
+  uint256 _inputOneAddAmount = 200;
+  uint256 _choosenId = 0;
 
   function setUp() public {
     productsModule = new MockProductsModule();
     additionalPrice = new AdditionalPrice(address(productsModule));
-  }
 
-  function testSetProductPrice() public {
-    /// set additional va custom inputs
+    /// set product price with additional custom inputs
     CurrencyAdditionalParams[]
       memory currencyAdditionalParams = new CurrencyAdditionalParams[](2);
-    currencyAdditionalParams[0] = CurrencyAdditionalParams(0, 1000);
-    currencyAdditionalParams[1] = CurrencyAdditionalParams(1, 2000);
+    currencyAdditionalParams[0] = CurrencyAdditionalParams(
+      0,
+      _inputZeroAddAmount
+    );
+    currencyAdditionalParams[1] = CurrencyAdditionalParams(
+      1,
+      _inputOneAddAmount
+    );
 
     CurrenciesParams[] memory currenciesParams = new CurrenciesParams[](1);
     currenciesParams[0] = CurrenciesParams(
-      address(0),
-      100,
+      _eth,
+      _basePrice,
       currencyAdditionalParams
     );
-
     additionalPrice.setProductPrice(slicerId, productId, currenciesParams);
+  }
 
-    (uint256 ethPrice, uint256 currencyPrice) = additionalPrice.getProductPrice(
+  /// Is there a better way to do it?
+  function bytesToUint(bytes memory b) internal pure returns (uint256) {
+    uint256 number;
+    for (uint i = 0; i < b.length; i++) {
+      number = number + uint(uint8(b[i])) * (2 ** (8 * (b.length - (i + 1))));
+    }
+    return number;
+  }
+
+  /// @notice quantity is a uint16, uint256 causes overflow error
+  function testProductPriceEth(uint16 quantity) public {
+    bytes memory customInputId = abi.encodePacked(_choosenId);
+
+    (uint256 ethPrice, uint256 currencyPrice) = additionalPrice.productPrice(
       slicerId,
       productId,
-      address(0),
-      2
+      _eth,
+      quantity,
+      address(1),
+      customInputId
     );
-    console.log(ethPrice, currencyPrice);
+
+    assertEq(currencyPrice, 0);
+    assertEq(ethPrice, quantity * _basePrice + _inputZeroAddAmount);
   }
 }
