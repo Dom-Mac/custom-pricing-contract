@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import { ISliceProductPrice } from "../Slice/interfaces/utils/ISliceProductPrice.sol";
 import { IProductsModule } from "../Slice/interfaces/IProductsModule.sol";
 import { AdditionalPriceParams } from "./structs/AdditionalPriceParams.sol";
-import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
+import "./structs/CurrenciesParams.sol";
 
 /// @title Adjust product price based on custom input - Slice pricing strategy
 /// @author jj-ranalli
@@ -22,10 +22,10 @@ contract AdditionalPrice is ISliceProductPrice {
                                 STORAGE
   //////////////////////////////////////////////////////////////*/
 
-  address internal immutable _productsModuleAddress;
+  address public immutable _productsModuleAddress;
   // Mapping from slicerId to productId to currency to AdditionalPriceParams
   mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
-    private _productParams;
+    public _productParams;
 
   /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
@@ -66,18 +66,26 @@ contract AdditionalPrice is ISliceProductPrice {
     uint256 productId,
     CurrenciesParams[] memory currenciesParams
   ) external onlyProductOwner(slicerId, productId) {
+    // Add reference for currency used in loop
+    CurrencyAdditionalParams[] memory currency;
+
     // Set currency params for each currency
     for (uint256 i; i < currenciesParams.length; ) {
-      // Set product params
-      _productParams[slicerId][productId][currenciesParams[i].currency]
-        .basePrice = currenciesParams[i].basePrice;
+      AdditionalPriceParams storage params = _productParams[slicerId][
+        productId
+      ][currenciesParams[i].currency];
 
+      // Set product params
+      params.basePrice = currenciesParams[i].basePrice;
+
+      // Store reference for currency used in loop
+      currency = currenciesParams[i].additionalPrices;
       // Set additional values for each customInputId
-      for (uint256 j; j < currenciesParams[i].additionalPrices.length; ) {
-        _productParams[slicerId][productId][currenciesParams[i].currency]
-          .additionalPrices[
-            currenciesParams[i].additionalPrices[j].customInputId
-          ] = currenciesParams[i].additionalPrices[j].additionalPrice;
+      for (uint256 j; j < currency.length; ) {
+        if (currency[j].customInputId == 0) revert();
+
+        params.additionalPrices[currency[j].customInputId] = currency[j]
+          .additionalPrice;
 
         unchecked {
           ++j;
@@ -96,6 +104,7 @@ contract AdditionalPrice is ISliceProductPrice {
 
   /**
    * @notice Function called by Slice protocol to calculate current product price.
+   * Base price is returned if data is missing or customId is zero.
    * @param slicerId ID of the slicer being queried
    * @param productId ID of the product being queried
    * @param currency Currency chosen for the purchase
@@ -112,14 +121,22 @@ contract AdditionalPrice is ISliceProductPrice {
   ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
     uint256 basePrice = _productParams[slicerId][productId][currency].basePrice;
     uint256 customId = abi.decode(data, (uint256));
-    uint256 additionalPrice = _productParams[slicerId][productId][currency]
-      .additionalPrices[customId];
+
+    uint256 additionalPrice;
+    if (customId != 0) {
+      additionalPrice = _productParams[slicerId][productId][currency]
+        .additionalPrices[customId];
+    }
+
+    uint256 price = additionalPrice != 0
+      ? quantity * basePrice + additionalPrice
+      : quantity * basePrice;
 
     // Set ethPrice or currencyPrice based on chosen currency
     if (currency == address(0)) {
-      ethPrice = quantity * basePrice + additionalPrice;
+      ethPrice = price;
     } else {
-      currencyPrice = quantity * basePrice + additionalPrice;
+      currencyPrice = price;
     }
   }
 }
