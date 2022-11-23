@@ -5,7 +5,7 @@ contract MockProductsModule {
   function isProductOwner(
     uint256,
     uint256,
-    address account
+    address
   ) external pure returns (bool isAllowed) {
     isAllowed = true;
   }
