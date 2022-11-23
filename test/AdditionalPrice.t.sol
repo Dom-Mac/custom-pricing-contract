@@ -44,8 +44,8 @@ contract TestAdditionalPrice is Test {
     additionalPrice.setProductPrice(slicerId, productId, currenciesParams);
   }
 
-  /// @notice quantity is a uint16, uint256 causes overflow error
-  function testProductPriceEth(uint16 quantity) public {
+  /// @notice quantity is a uint128, uint256 causes overflow error
+  function testProductPriceEth(uint128 quantity) public {
     uint256 _choosenId = 1;
     bytes memory customInputId = abi.encodePacked(_choosenId);
 

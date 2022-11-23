@@ -1,1 +1,2 @@
-TestContract:testBar() (gas: 401)
+TestAdditionalPrice:testProductBasePriceEth(uint128) (runs: 256, μ: 14088, ~: 14088)
+TestAdditionalPrice:testProductPriceEth(uint128) (runs: 256, μ: 18671, ~: 18671)
