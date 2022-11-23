@@ -5,7 +5,7 @@
 ## Getting Started
 
 ```sh
-forge build
+forge install
 forge test
 ```
 
