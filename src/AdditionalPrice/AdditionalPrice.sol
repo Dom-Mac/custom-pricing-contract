@@ -110,7 +110,6 @@ contract AdditionalPrice is ISliceProductPrice {
     bytes memory data
   ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
     uint256 basePrice = _productParams[slicerId][productId][currency].basePrice;
-    // TODO fix [0]
     uint256 customId = abi.decode(data, (uint256));
     uint256 additionalPrice = _productParams[slicerId][productId][currency]
       .additionalPrices[customId];
