@@ -45,15 +45,6 @@ contract TestAdditionalPrice is Test {
     additionalPrice.setProductPrice(slicerId, productId, currenciesParams);
   }
 
-  /// Is there a better way to do it?
-  function bytesToUint(bytes memory b) internal pure returns (uint256) {
-    uint256 number;
-    for (uint i = 0; i < b.length; i++) {
-      number = number + uint(uint8(b[i])) * (2 ** (8 * (b.length - (i + 1))));
-    }
-    return number;
-  }
-
   /// @notice quantity is a uint16, uint256 causes overflow error
   function testProductPriceEth(uint16 quantity) public {
     bytes memory customInputId = abi.encodePacked(_choosenId);

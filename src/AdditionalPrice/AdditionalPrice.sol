@@ -5,11 +5,6 @@ import { ISliceProductPrice } from "../Slice/interfaces/utils/ISliceProductPrice
 import { IProductsModule } from "../Slice/interfaces/IProductsModule.sol";
 import { AdditionalPriceParams } from "./structs/AdditionalPriceParams.sol";
 import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
-// import { console } from "forge-std/console.sol";
-
-import { console } from "lib/forge-std/src/console.sol";
-
-// import { CurrenciesParams } from "./structs/CurrenciesParams.sol";
 
 /// @title Adjust product price based on custom input - Slice pricing strategy
 /// @author jj-ranalli
@@ -73,10 +68,6 @@ contract AdditionalPrice is ISliceProductPrice {
   ) external onlyProductOwner(slicerId, productId) {
     // Set currency params
     for (uint256 i; i < currenciesParams.length; ) {
-      // Mapping from slicerId to productId to currency to AdditionalPriceParams
-      // mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
-      //   private _productParams;
-
       // Set product params
       _productParams[slicerId][productId][currenciesParams[i].currency]
         .basePrice = currenciesParams[i].basePrice;
@@ -120,12 +111,9 @@ contract AdditionalPrice is ISliceProductPrice {
   ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
     uint256 basePrice = _productParams[slicerId][productId][currency].basePrice;
     // TODO fix [0]
+    uint256 customId = abi.decode(data, (uint256));
     uint256 additionalPrice = _productParams[slicerId][productId][currency]
-      .additionalPrices[0];
-
-    console.log(basePrice);
-    console.log(additionalPrice);
-    console.logBytes(data);
+      .additionalPrices[customId];
 
     // Set ethPrice or currencyPrice based on chosen currency
     if (currency == address(0)) {
