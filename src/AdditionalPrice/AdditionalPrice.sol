@@ -66,12 +66,13 @@ contract AdditionalPrice is ISliceProductPrice {
     uint256 productId,
     CurrenciesParams[] memory currenciesParams
   ) external onlyProductOwner(slicerId, productId) {
-    // Set currency params
+    // Set currency params for each currency
     for (uint256 i; i < currenciesParams.length; ) {
       // Set product params
       _productParams[slicerId][productId][currenciesParams[i].currency]
         .basePrice = currenciesParams[i].basePrice;
 
+      // Set additional values for each customInputId
       for (uint256 j; j < currenciesParams[i].additionalPrices.length; ) {
         _productParams[slicerId][productId][currenciesParams[i].currency]
           .additionalPrices[
