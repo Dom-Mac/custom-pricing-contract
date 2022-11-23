@@ -16,9 +16,8 @@ contract TestAdditionalPrice is Test {
   AdditionalPrice additionalPrice;
   address _eth = address(0);
   uint256 _basePrice = 1000;
-  uint256 _inputZeroAddAmount = 100;
-  uint256 _inputOneAddAmount = 200;
-  uint256 _choosenId = 0;
+  uint256 _inputOneAddAmount = 100;
+  uint256 _inputTwoAddAmount = 200;
 
   function setUp() public {
     productsModule = new MockProductsModule();
@@ -28,12 +27,12 @@ contract TestAdditionalPrice is Test {
     CurrencyAdditionalParams[]
       memory currencyAdditionalParams = new CurrencyAdditionalParams[](2);
     currencyAdditionalParams[0] = CurrencyAdditionalParams(
-      0,
-      _inputZeroAddAmount
-    );
-    currencyAdditionalParams[1] = CurrencyAdditionalParams(
       1,
       _inputOneAddAmount
+    );
+    currencyAdditionalParams[1] = CurrencyAdditionalParams(
+      2,
+      _inputTwoAddAmount
     );
 
     CurrenciesParams[] memory currenciesParams = new CurrenciesParams[](1);
@@ -47,6 +46,7 @@ contract TestAdditionalPrice is Test {
 
   /// @notice quantity is a uint16, uint256 causes overflow error
   function testProductPriceEth(uint16 quantity) public {
+    uint256 _choosenId = 1;
     bytes memory customInputId = abi.encodePacked(_choosenId);
 
     (uint256 ethPrice, uint256 currencyPrice) = additionalPrice.productPrice(
@@ -59,6 +59,25 @@ contract TestAdditionalPrice is Test {
     );
 
     assertEq(currencyPrice, 0);
-    assertEq(ethPrice, quantity * _basePrice + _inputZeroAddAmount);
+    assertEq(ethPrice, quantity * _basePrice + _inputOneAddAmount);
+  }
+
+  /// @notice quantity is a uint128, uint256 causes overflow error
+  /// @dev customInput 0 returns the base price
+  function testProductBasePriceEth(uint128 quantity) public {
+    uint256 _choosenId = 0;
+    bytes memory customInputId = abi.encodePacked(_choosenId);
+
+    (uint256 ethPrice, uint256 currencyPrice) = additionalPrice.productPrice(
+      slicerId,
+      productId,
+      _eth,
+      quantity,
+      address(1),
+      customInputId
+    );
+
+    assertEq(currencyPrice, 0);
+    assertEq(ethPrice, quantity * _basePrice);
   }
 }
