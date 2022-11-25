@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import { ISliceProductPrice } from "../Slice/interfaces/utils/ISliceProductPrice.sol";
 import { IProductsModule } from "../Slice/interfaces/IProductsModule.sol";
-import { AdditionalPriceParams } from "./structs/AdditionalPriceParams.sol";
+import "./structs/AdditionalPriceParams.sol";
 import "./structs/CurrenciesParams.sol";
 
 /// @title Adjust product price based on custom input - Slice pricing strategy
