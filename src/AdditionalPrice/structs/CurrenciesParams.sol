@@ -13,7 +13,7 @@ import { Strategy } from "./AdditionalPriceParams.sol";
 
 struct CurrenciesParams {
   address currency;
-  uint128 basePrice;
+  uint256 basePrice;
   Strategy strategy;
   bool dependsOnQuantity;
   CurrencyAdditionalParams[] additionalPrices;

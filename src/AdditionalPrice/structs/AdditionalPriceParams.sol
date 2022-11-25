@@ -10,7 +10,7 @@ enum Strategy {Custom, Percentage}
 /// @param additionalPrices mapping from customInputId to additionalPrice/percentage,                     
 
 struct AdditionalPriceParams {
-  uint128 basePrice;
+  uint256 basePrice;
   Strategy strategy;
   bool dependsOnQuantity;
   mapping(uint256 => uint256) additionalPrices;

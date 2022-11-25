@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 // import "forge-std/Test.sol";
 import "lib/forge-std/src/Test.sol";
 import "src/AdditionalPrice/AdditionalPrice.sol";
-import { CurrenciesParams } from "src/AdditionalPrice/structs/CurrenciesParams.sol";
-import { CurrencyAdditionalParams } from "src/AdditionalPrice/structs/CurrencyAdditionalParams.sol";
+import "src/AdditionalPrice/structs/CurrenciesParams.sol";
+import "src/AdditionalPrice/structs/CurrencyAdditionalParams.sol";
 import { MockProductsModule } from "./mocks/MockProductsModule.sol";
 
 uint256 constant slicerId = 0;
@@ -18,6 +18,8 @@ contract TestAdditionalPrice is Test {
   uint256 _basePrice = 1000;
   uint256 _inputOneAddAmount = 100;
   uint256 _inputTwoAddAmount = 200;
+  Strategy strategy = Strategy.Custom;
+  bool dependsOnQuantity = false;
 
   function setUp() public {
     productsModule = new MockProductsModule();
@@ -39,12 +41,14 @@ contract TestAdditionalPrice is Test {
     currenciesParams[0] = CurrenciesParams(
       _eth,
       _basePrice,
+      strategy,
+      dependsOnQuantity,
       currencyAdditionalParams
     );
     additionalPrice.setProductPrice(slicerId, productId, currenciesParams);
   }
 
-  /// @notice quantity is a uint128, uint256 causes overflow error
+  /// @notice quantity is uint128, uint256 causes overflow error
   function testProductPriceEth(uint128 quantity) public {
     uint256 _choosenId = 1;
     bytes memory customInputId = abi.encodePacked(_choosenId);
@@ -62,7 +66,7 @@ contract TestAdditionalPrice is Test {
     assertEq(ethPrice, quantity * _basePrice + _inputOneAddAmount);
   }
 
-  /// @notice quantity is a uint128, uint256 causes overflow error
+  /// @notice quantity is uint128, uint256 causes overflow error
   /// @dev customInput 0 returns the base price
   function testProductBasePriceEth(uint128 quantity) public {
     uint256 _choosenId = 0;

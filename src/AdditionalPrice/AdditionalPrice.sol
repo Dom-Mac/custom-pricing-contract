@@ -67,7 +67,7 @@ contract AdditionalPrice is ISliceProductPrice {
     CurrenciesParams[] memory currenciesParams
   ) external onlyProductOwner(slicerId, productId) {
     // Add reference for currency used in loop
-    CurrencyAdditionalParams[] memory currency;
+    CurrencyAdditionalParams[] memory currencyAdd;
 
     // Set currency params for each currency
     for (uint256 i; i < currenciesParams.length; ) {
@@ -77,14 +77,16 @@ contract AdditionalPrice is ISliceProductPrice {
 
       // Set product params
       params.basePrice = currenciesParams[i].basePrice;
+      params.strategy = currenciesParams[i].strategy;
+      params.dependsOnQuantity = currenciesParams[i].dependsOnQuantity;
 
       // Store reference for currency used in loop
-      currency = currenciesParams[i].additionalPrices;
+      currencyAdd = currenciesParams[i].additionalPrices;
       // Set additional values for each customInputId
-      for (uint256 j; j < currency.length; ) {
-        if (currency[j].customInputId == 0) revert();
+      for (uint256 j; j < currencyAdd.length; ) {
+        if (currencyAdd[j].customInputId == 0) revert();
 
-        params.additionalPrices[currency[j].customInputId] = currency[j]
+        params.additionalPrices[currencyAdd[j].customInputId] = currencyAdd[j]
           .additionalPrice;
 
         unchecked {
