@@ -22,17 +22,17 @@ contract AdditionalPrice is ISliceProductPrice {
                                 STORAGE
   //////////////////////////////////////////////////////////////*/
 
-  address public immutable _productsModuleAddress;
+  address public immutable productsModuleAddress;
   // Mapping from slicerId to productId to currency to AdditionalPriceParams
   mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
-    public _productParams;
+    public productParams;
 
   /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-  constructor(address productsModuleAddress) {
-    _productsModuleAddress = productsModuleAddress;
+  constructor(address _productsModuleAddress) {
+    productsModuleAddress = _productsModuleAddress;
   }
 
   /*//////////////////////////////////////////////////////////////
@@ -41,11 +41,11 @@ contract AdditionalPrice is ISliceProductPrice {
 
   /// @notice Check if msg.sender is owner of a product. Used to manage access of `setProductPrice`
   /// in implementations of this contract.
-  modifier onlyProductOwner(uint256 slicerId, uint256 productId) {
+  modifier onlyProductOwner(uint256 _slicerId, uint256 _productId) {
     require(
-      IProductsModule(_productsModuleAddress).isProductOwner(
-        slicerId,
-        productId,
+      IProductsModule(productsModuleAddress).isProductOwner(
+        _slicerId,
+        _productId,
         msg.sender
       ),
       "NOT_PRODUCT_OWNER"
@@ -58,35 +58,35 @@ contract AdditionalPrice is ISliceProductPrice {
     //////////////////////////////////////////////////////////////*/
 
   /// @notice Set customInputId and AdditionalPrice for product.
-  /// @param slicerId ID of the slicer to set the price params for.
-  /// @param productId ID of the product to set the price params for.
+  /// @param _slicerId ID of the slicer to set the price params for.
+  /// @param _productId ID of the product to set the price params for.
 
   function setProductPrice(
-    uint256 slicerId,
-    uint256 productId,
-    CurrenciesParams[] memory currenciesParams
-  ) external onlyProductOwner(slicerId, productId) {
+    uint256 _slicerId,
+    uint256 _productId,
+    CurrenciesParams[] memory _currenciesParams
+  ) external onlyProductOwner(_slicerId, _productId) {
     // Add reference for currency used in loop
-    CurrencyAdditionalParams[] memory currencyAdd;
+    CurrencyAdditionalParams[] memory _currencyAdd;
 
     // Set currency params for each currency
-    for (uint256 i; i < currenciesParams.length; ) {
-      AdditionalPriceParams storage params = _productParams[slicerId][
-        productId
-      ][currenciesParams[i].currency];
+    for (uint256 i; i < _currenciesParams.length; ) {
+      AdditionalPriceParams storage params = productParams[_slicerId][
+        _productId
+      ][_currenciesParams[i].currency];
 
       // Set product params
-      params.basePrice = currenciesParams[i].basePrice;
-      params.strategy = currenciesParams[i].strategy;
-      params.dependsOnQuantity = currenciesParams[i].dependsOnQuantity;
+      params.basePrice = _currenciesParams[i].basePrice;
+      params.strategy = _currenciesParams[i].strategy;
+      params.dependsOnQuantity = _currenciesParams[i].dependsOnQuantity;
 
       // Store reference for currency used in loop
-      currencyAdd = currenciesParams[i].additionalPrices;
+      _currencyAdd = _currenciesParams[i].additionalPrices;
       // Set additional values for each customInputId
-      for (uint256 j; j < currencyAdd.length; ) {
-        if (currencyAdd[j].customInputId == 0) revert();
+      for (uint256 j; j < _currencyAdd.length; ) {
+        if (_currencyAdd[j].customInputId == 0) revert();
 
-        params.additionalPrices[currencyAdd[j].customInputId] = currencyAdd[j]
+        params.additionalPrices[_currencyAdd[j].customInputId] = _currencyAdd[j]
           .additionalPrice;
 
         unchecked {
@@ -107,32 +107,54 @@ contract AdditionalPrice is ISliceProductPrice {
   /**
    * @notice Function called by Slice protocol to calculate current product price.
    * Base price is returned if data is missing or customId is zero.
-   * @param slicerId ID of the slicer being queried
-   * @param productId ID of the product being queried
+   * @param _slicerId ID of the slicer being queried
+   * @param _productId ID of the product being queried
    * @param currency Currency chosen for the purchase
    * @param quantity Number of units purchased
    * @return ethPrice and currencyPrice of product.
    */
   function productPrice(
-    uint256 slicerId,
-    uint256 productId,
+    uint256 _slicerId,
+    uint256 _productId,
     address currency,
     uint256 quantity,
     address,
     bytes memory data
   ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
-    uint256 basePrice = _productParams[slicerId][productId][currency].basePrice;
+    /// get basePrice, strategy
+    uint256 basePrice = productParams[_slicerId][_productId][currency].basePrice;
+    Strategy strategy = productParams[_slicerId][_productId][currency].strategy;
+    bool dependsOnQuantity = productParams[_slicerId][_productId][currency].dependsOnQuantity;
     uint256 customId = abi.decode(data, (uint256));
 
+    /// additionalPrice price is a value or a percentage based on the strategy
     uint256 additionalPrice;
     if (customId != 0) {
-      additionalPrice = _productParams[slicerId][productId][currency]
+      additionalPrice = productParams[_slicerId][_productId][currency]
         .additionalPrices[customId];
     }
 
-    uint256 price = additionalPrice != 0
-      ? quantity * basePrice + additionalPrice
+    uint256 price = additionalPrice != 0 
+      ? strategy == Strategy.Custom 
+      ? quantity * basePrice + additionalPrice // if additionalPrice is 
+      : (quantity + additionalPrice/100) * basePrice
       : quantity * basePrice;
+
+      if (additionalPrice != 0 ) {
+        if (strategy == Strategy.Custom ) {
+          price = dependsOnQuantity 
+          ? quantity * (basePrice + additionalPrice) 
+          : quantity * basePrice + additionalPrice;
+        } else if (strategy == Strategy.Percentage) {
+          price = dependsOnQuantity 
+          ? (quantity + additionalPrice/100) * basePrice 
+          : (quantity + additionalPrice/100);
+        } else {
+          price = quantity * basePrice;
+        }
+      } else {
+        price = quantity * basePrice;
+      }
 
     // Set ethPrice or currencyPrice based on chosen currency
     if (currency == address(0)) {
