@@ -156,7 +156,6 @@ contract AdditionalPrice is ISliceProductPrice {
     /// based on the strategy additionalPrice price represents a value or a %
     uint256 additionalPrice;
     /// if customId is 0 additionalPrice is 0, this function returns the basePrice * quantity
-    /// TODO: validate customId = 0 logic
     if (customId != 0) {
       additionalPrice = productParams[_slicerId][_productId][_currency]
         .additionalPrices[customId];
