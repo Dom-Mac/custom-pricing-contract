@@ -18,12 +18,24 @@ import "./structs/CurrenciesParams.sol";
 /// - Adds onlyProductOwner modifier used to verify sender's permissions on Slice before setting product params
 
 contract AdditionalPrice is ISliceProductPrice {
-  /*//////////////////////////////////////////////////////////////
-                                STORAGE
-  //////////////////////////////////////////////////////////////*/
+  //*********************************************************************//
+  // ------------------------ immutable storage ------------------------ //
+  //*********************************************************************//
 
+  /**
+    @notice
+    Address of the Slice ProductsModule
+  */
   address public immutable productsModuleAddress;
-  // Mapping from slicerId to productId to currency to AdditionalPriceParams
+
+  //*********************************************************************//
+  // ------------------------- mutable storage ------------------------- //
+  //*********************************************************************//
+
+  /**
+    @notice
+    Mapping from slicerId to productId to currency to AdditionalPriceParams
+  */
   mapping(uint256 => mapping(uint256 => mapping(address => AdditionalPriceParams)))
     public productParams;
 
