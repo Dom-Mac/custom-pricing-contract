@@ -92,6 +92,7 @@ contract TestAdditionalPrice is Test {
       address(1),
       customInputId
     );
+
     assertEq(currencyPrice, 0);
     assertEq(ethPrice, _basePrice);
   }

@@ -156,25 +156,8 @@ contract AdditionalPrice is ISliceProductPrice {
     }
 
     uint256 price = additionalPrice != 0
-      ? getPriceBasedOnStrategy(strategy, dependsOnQuantity, basePrice, additionalPrice)
+      ? getPriceBasedOnStrategy(strategy, dependsOnQuantity, basePrice, additionalPrice, _quantity)
       : _quantity * basePrice;
-
-    /// TODO: validate and comment strategies
-    if (additionalPrice != 0) {
-      if (strategy == Strategy.Custom) {
-        price = dependsOnQuantity
-          ? _quantity * (basePrice + additionalPrice)
-          : _quantity * basePrice + additionalPrice;
-      } else if (strategy == Strategy.Percentage) {
-        price = dependsOnQuantity
-          ? (_quantity + additionalPrice / 100) * basePrice
-          : (_quantity + additionalPrice / 100);
-      } else {
-        price = _quantity * basePrice;
-      }
-    } else {
-      price = _quantity * basePrice;
-    }
 
     // Set ethPrice or currencyPrice based on chosen currency
     if (_currency == address(0)) {
@@ -185,13 +168,26 @@ contract AdditionalPrice is ISliceProductPrice {
   }
 
   //*********************************************************************//
-  // -------------------------- internal views --------------------------- //
+  // ------------------------- internal pures -------------------------- //
   //*********************************************************************//
 
   function getPriceBasedOnStrategy(
     Strategy _strategy,
     bool _dependsOnQuantity,
     uint256 _basePrice,
-    uint256 _additionalPrice
-  ) internal view returns (uint256 strategyPrice) {}
+    uint256 _additionalPrice,
+    uint256 _quantity
+  ) internal pure returns (uint256 strategyPrice) {
+    if (_strategy == Strategy.Custom) {
+      strategyPrice = _dependsOnQuantity
+        ? _quantity * (_basePrice + _additionalPrice)
+        : _quantity * _basePrice + _additionalPrice;
+    } else if (_strategy == Strategy.Percentage) {
+      strategyPrice = _dependsOnQuantity
+        ? (_quantity + _additionalPrice / 100) * _basePrice
+        : (_quantity + _additionalPrice / 100);
+    } else {
+      strategyPrice = _quantity * _basePrice;
+    }
+  }
 }
