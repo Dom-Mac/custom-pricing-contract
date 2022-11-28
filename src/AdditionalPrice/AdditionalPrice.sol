@@ -119,27 +119,32 @@ contract AdditionalPrice is ISliceProductPrice {
     address currency,
     uint256 quantity,
     address,
-    bytes memory data
+    bytes memory data /// data in here corresponds to the choosen customId
   ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
-    /// get basePrice, strategy
+    /// get basePrice, strategy and dependsOnQuantity from storage
     uint256 basePrice = productParams[_slicerId][_productId][currency].basePrice;
     Strategy strategy = productParams[_slicerId][_productId][currency].strategy;
     bool dependsOnQuantity = productParams[_slicerId][_productId][currency].dependsOnQuantity;
+    /// decode the customId from byte to uint
     uint256 customId = abi.decode(data, (uint256));
 
-    /// additionalPrice price is a value or a percentage based on the strategy
+    /// based on the strategy additionalPrice price represents a value or a %
     uint256 additionalPrice;
+    /// if customId is 0 additionalPrice is 0, this function returns the basePrice * quantity
+    /// TODO: validate customId = 0 logic
     if (customId != 0) {
       additionalPrice = productParams[_slicerId][_productId][currency]
         .additionalPrices[customId];
     }
 
+    /// get price depending on rules
     uint256 price = additionalPrice != 0 
       ? strategy == Strategy.Custom 
       ? quantity * basePrice + additionalPrice // if additionalPrice is 
       : (quantity + additionalPrice/100) * basePrice
       : quantity * basePrice;
 
+    /// TODO: validate and comment strategies
       if (additionalPrice != 0 ) {
         if (strategy == Strategy.Custom ) {
           price = dependsOnQuantity 
