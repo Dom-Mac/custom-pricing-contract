@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import { ISliceProductPrice } from "../Slice/interfaces/utils/ISliceProductPrice.sol";
-import { IProductsModule } from "../Slice/interfaces/IProductsModule.sol";
-import "./structs/AdditionalPriceParams.sol";
-import "./structs/CurrenciesParams.sol";
+import {ISliceProductPrice} from '../Slice/interfaces/utils/ISliceProductPrice.sol';
+import {IProductsModule} from '../Slice/interfaces/IProductsModule.sol';
+import './structs/AdditionalPriceParams.sol';
+import './structs/CurrenciesParams.sol';
 
 /**
   @title Adjust product price based on custom input - Slice pricing strategy
@@ -60,12 +60,8 @@ contract AdditionalPrice is ISliceProductPrice {
   */
   modifier onlyProductOwner(uint256 _slicerId, uint256 _productId) {
     require(
-      IProductsModule(productsModuleAddress).isProductOwner(
-        _slicerId,
-        _productId,
-        msg.sender
-      ),
-      "NOT_PRODUCT_OWNER"
+      IProductsModule(productsModuleAddress).isProductOwner(_slicerId, _productId, msg.sender),
+      'NOT_PRODUCT_OWNER'
     );
     _;
   }
@@ -92,9 +88,9 @@ contract AdditionalPrice is ISliceProductPrice {
     /// For each strategy, grouped by currency
     for (uint256 i; i < _currenciesParams.length; ) {
       /// Access to AdditionalPriceParams for a specific slice, product and currency
-      AdditionalPriceParams storage params = productParams[_slicerId][
-        _productId
-      ][_currenciesParams[i].currency];
+      AdditionalPriceParams storage params = productParams[_slicerId][_productId][
+        _currenciesParams[i].currency
+      ];
 
       /// Save currency base price and strategy values
       params.basePrice = _currenciesParams[i].basePrice;
@@ -109,8 +105,7 @@ contract AdditionalPrice is ISliceProductPrice {
         if (_currencyAdd[j].customInputId == 0) revert();
 
         /// Save the additional value for the j input
-        params.additionalPrices[_currencyAdd[j].customInputId] = _currencyAdd[j]
-          .additionalPrice;
+        params.additionalPrices[_currencyAdd[j].customInputId] = _currencyAdd[j].additionalPrice;
 
         unchecked {
           ++j;
@@ -157,33 +152,29 @@ contract AdditionalPrice is ISliceProductPrice {
     uint256 additionalPrice;
     /// if customId is 0 additionalPrice is 0, this function returns the basePrice * quantity
     if (customId != 0) {
-      additionalPrice = productParams[_slicerId][_productId][_currency]
-        .additionalPrices[customId];
+      additionalPrice = productParams[_slicerId][_productId][_currency].additionalPrices[customId];
     }
 
-    /// get price depending on rules
-    uint256 price = additionalPrice != 0 
-      ? strategy == Strategy.Custom 
-      ? _quantity * basePrice + additionalPrice // if additionalPrice is 
-      : (_quantity + additionalPrice/100) * basePrice
+    uint256 price = additionalPrice != 0
+      ? getPriceBasedOnStrategy(strategy, dependsOnQuantity, basePrice, additionalPrice)
       : _quantity * basePrice;
 
     /// TODO: validate and comment strategies
-      if (additionalPrice != 0 ) {
-        if (strategy == Strategy.Custom ) {
-          price = dependsOnQuantity 
-          ? _quantity * (basePrice + additionalPrice) 
+    if (additionalPrice != 0) {
+      if (strategy == Strategy.Custom) {
+        price = dependsOnQuantity
+          ? _quantity * (basePrice + additionalPrice)
           : _quantity * basePrice + additionalPrice;
-        } else if (strategy == Strategy.Percentage) {
-          price = dependsOnQuantity 
-          ? (_quantity + additionalPrice/100) * basePrice 
-          : (_quantity + additionalPrice/100);
-        } else {
-          price = _quantity * basePrice;
-        }
+      } else if (strategy == Strategy.Percentage) {
+        price = dependsOnQuantity
+          ? (_quantity + additionalPrice / 100) * basePrice
+          : (_quantity + additionalPrice / 100);
       } else {
         price = _quantity * basePrice;
       }
+    } else {
+      price = _quantity * basePrice;
+    }
 
     // Set ethPrice or currencyPrice based on chosen currency
     if (_currency == address(0)) {
@@ -192,4 +183,15 @@ contract AdditionalPrice is ISliceProductPrice {
       currencyPrice = price;
     }
   }
+
+  //*********************************************************************//
+  // -------------------------- internal views --------------------------- //
+  //*********************************************************************//
+
+  function getPriceBasedOnStrategy(
+    Strategy _strategy,
+    bool _dependsOnQuantity,
+    uint256 _basePrice,
+    uint256 _additionalPrice
+  ) internal view returns (uint256 strategyPrice) {}
 }

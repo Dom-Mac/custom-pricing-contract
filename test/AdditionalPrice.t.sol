@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 // import "forge-std/Test.sol";
-import "lib/forge-std/src/Test.sol";
-import {console} from "lib/forge-std/src/console.sol";
-import "src/AdditionalPrice/AdditionalPrice.sol";
-import "src/AdditionalPrice/structs/CurrenciesParams.sol";
-import "src/AdditionalPrice/structs/CurrencyAdditionalParams.sol";
-import { MockProductsModule } from "./mocks/MockProductsModule.sol";
+import 'lib/forge-std/src/Test.sol';
+import {console} from 'lib/forge-std/src/console.sol';
+import 'src/AdditionalPrice/AdditionalPrice.sol';
+import 'src/AdditionalPrice/structs/CurrenciesParams.sol';
+import 'src/AdditionalPrice/structs/CurrencyAdditionalParams.sol';
+import {MockProductsModule} from './mocks/MockProductsModule.sol';
 
 uint256 constant slicerId = 0;
 uint256 constant productId = 1;
@@ -27,16 +27,9 @@ contract TestAdditionalPrice is Test {
     additionalPrice = new AdditionalPrice(address(productsModule));
 
     /// set product price with additional custom inputs
-    CurrencyAdditionalParams[]
-      memory currencyAdditionalParams = new CurrencyAdditionalParams[](2);
-    currencyAdditionalParams[0] = CurrencyAdditionalParams(
-      1,
-      _inputOneAddAmount
-    );
-    currencyAdditionalParams[1] = CurrencyAdditionalParams(
-      2,
-      _inputTwoAddAmount
-    );
+    CurrencyAdditionalParams[] memory currencyAdditionalParams = new CurrencyAdditionalParams[](2);
+    currencyAdditionalParams[0] = CurrencyAdditionalParams(1, _inputOneAddAmount);
+    currencyAdditionalParams[1] = CurrencyAdditionalParams(2, _inputTwoAddAmount);
 
     CurrenciesParams[] memory currenciesParams = new CurrenciesParams[](1);
     currenciesParams[0] = CurrenciesParams(
