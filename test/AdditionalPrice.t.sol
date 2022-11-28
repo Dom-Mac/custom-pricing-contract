@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 // import "forge-std/Test.sol";
 import "lib/forge-std/src/Test.sol";
+import {console} from "lib/forge-std/src/console.sol";
 import "src/AdditionalPrice/AdditionalPrice.sol";
 import "src/AdditionalPrice/structs/CurrenciesParams.sol";
 import "src/AdditionalPrice/structs/CurrencyAdditionalParams.sol";
@@ -67,7 +68,7 @@ contract TestAdditionalPrice is Test {
   }
 
   /// @notice quantity is uint128, uint256 causes overflow error
-  /// @dev customInput 0 returns the base price
+  /// @dev customInput 0 -> the base price is returned
   function testProductBasePriceEth(uint128 quantity) public {
     uint256 _choosenId = 0;
     bytes memory customInputId = abi.encodePacked(_choosenId);
@@ -83,5 +84,22 @@ contract TestAdditionalPrice is Test {
 
     assertEq(currencyPrice, 0);
     assertEq(ethPrice, quantity * _basePrice);
+  }
+
+  /// @dev non existing input returns the base price, quantity = 1
+  function testNonExistingInput() public {
+    uint256 _choosenId = 10;
+    bytes memory customInputId = abi.encodePacked(_choosenId);
+
+    (uint256 ethPrice, uint256 currencyPrice) = additionalPrice.productPrice(
+      slicerId,
+      productId,
+      _eth,
+      1,
+      address(1),
+      customInputId
+    );
+    assertEq(currencyPrice, 0);
+    assertEq(ethPrice, _basePrice);
   }
 }
