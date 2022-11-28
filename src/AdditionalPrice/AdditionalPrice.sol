@@ -171,23 +171,34 @@ contract AdditionalPrice is ISliceProductPrice {
   // ------------------------- internal pures -------------------------- //
   //*********************************************************************//
 
+  /**
+    @notice 
+    Function called to handle price calculation logic based on strategies
+
+    @param _strategy ID of the slicer being queried
+    @param _dependsOnQuantity ID of the product being queried
+    @param _basePrice Currency chosen for the purchase
+    @param _additionalPrice Currency chosen for the purchase
+    @param _quantity Number of units purchased
+    @return _strategyPrice and currencyPrice of product.
+   */
   function getPriceBasedOnStrategy(
     Strategy _strategy,
     bool _dependsOnQuantity,
     uint256 _basePrice,
     uint256 _additionalPrice,
     uint256 _quantity
-  ) internal pure returns (uint256 strategyPrice) {
+  ) internal pure returns (uint256 _strategyPrice) {
     if (_strategy == Strategy.Custom) {
-      strategyPrice = _dependsOnQuantity
+      _strategyPrice = _dependsOnQuantity
         ? _quantity * (_basePrice + _additionalPrice)
         : _quantity * _basePrice + _additionalPrice;
     } else if (_strategy == Strategy.Percentage) {
-      strategyPrice = _dependsOnQuantity
-        ? (_quantity + _additionalPrice / 100) * _basePrice
-        : (_quantity + _additionalPrice / 100);
+      _strategyPrice = _dependsOnQuantity
+        ? _basePrice * _quantity * (1 + _additionalPrice / 100)
+        : (_quantity + _additionalPrice / 100) * _basePrice;
     } else {
-      strategyPrice = _quantity * _basePrice;
+      _strategyPrice = _quantity * _basePrice;
     }
   }
 }
