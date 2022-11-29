@@ -139,14 +139,14 @@ contract AdditionalPrice is ISliceProductPrice {
     address _currency,
     uint256 _quantity,
     address,
-    bytes memory data /// data in here corresponds to the choosen customId
+    bytes memory _data /// data in here corresponds to the choosen customId
   ) public view override returns (uint256 ethPrice, uint256 currencyPrice) {
     /// get basePrice, strategy and dependsOnQuantity from storage
     uint256 basePrice = productParams[_slicerId][_productId][_currency].basePrice;
     Strategy strategy = productParams[_slicerId][_productId][_currency].strategy;
     bool dependsOnQuantity = productParams[_slicerId][_productId][_currency].dependsOnQuantity;
     /// decode the customId from byte to uint
-    uint256 customId = abi.decode(data, (uint256));
+    uint256 customId = abi.decode(_data, (uint256));
 
     /// based on the strategy additionalPrice price represents a value or a %
     uint256 additionalPrice;
