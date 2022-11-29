@@ -51,7 +51,7 @@ contract TestAdditionalPrice is Test {
   }
 
   /// @notice quantity is uint128, uint256 causes overflow error
-  function testProductPriceEth(uint128 quantity) public {
+  function testProductPriceEth(uint128 _quantity) public {
     createPriceStrategy(Strategy.Custom, false);
     uint256 _choosenId = 1;
     bytes memory customInputId = abi.encodePacked(_choosenId);
@@ -60,18 +60,18 @@ contract TestAdditionalPrice is Test {
       slicerId,
       productId,
       eth,
-      quantity,
+      _quantity,
       address(1),
       customInputId
     );
 
     assertEq(currencyPrice, 0);
-    assertEq(ethPrice, quantity * basePrice + inputOneAddAmount);
+    assertEq(ethPrice, _quantity * basePrice + inputOneAddAmount);
   }
 
   /// @notice quantity is uint128, uint256 causes overflow error
   /// @dev if customInput = 0 -> the base price is returned
-  function testProductBasePriceEth(uint128 quantity) public {
+  function testProductBasePriceEth(uint128 _quantity) public {
     createPriceStrategy(Strategy.Custom, false);
     uint256 _choosenId = 0;
     bytes memory customInputId = abi.encodePacked(_choosenId);
@@ -80,13 +80,13 @@ contract TestAdditionalPrice is Test {
       slicerId,
       productId,
       eth,
-      quantity,
+      _quantity,
       address(1),
       customInputId
     );
 
     assertEq(currencyPrice, 0);
-    assertEq(ethPrice, quantity * basePrice);
+    assertEq(ethPrice, _quantity * basePrice);
   }
 
   /// @dev non existing input returns the base price, quantity = 1
