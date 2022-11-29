@@ -141,7 +141,7 @@ contract TestAdditionalPrice is Test {
     createPriceStrategy(Strategy.Percentage, true);
     bytes memory customInputIdOne = abi.encodePacked(uint(1));
     bytes memory customInputIdTwo = abi.encodePacked(uint(2));
-    uint256 quantity = 1;
+    uint256 quantity = 2;
     (uint256 ethPrice, uint256 currencyPrice) = additionalPrice.productPrice(
       slicerId,
       productId,
@@ -160,7 +160,35 @@ contract TestAdditionalPrice is Test {
     );
 
     assertEq(currencyPrice, 0);
-    assertEq(ethPrice, quantity * basePrice + (basePrice * inputOnePercentage) / 100);
-    assertEq(ethPriceTwo, quantity * basePrice + (basePrice * inputTwoPercentage) / 100);
+    assertEq(ethPrice, quantity * basePrice + (quantity * basePrice * inputOnePercentage) / 100);
+    assertEq(ethPriceTwo, quantity * basePrice + (quantity * basePrice * inputTwoPercentage) / 100);
+  }
+
+  /// @dev Input 1: 10%, input 2: 20%
+  function testAddQuantity() public {
+    createPriceStrategy(Strategy.Custom, true);
+    bytes memory customInputIdOne = abi.encodePacked(uint(1));
+    bytes memory customInputIdTwo = abi.encodePacked(uint(2));
+    uint256 quantity = 2;
+    (uint256 ethPrice, uint256 currencyPrice) = additionalPrice.productPrice(
+      slicerId,
+      productId,
+      eth,
+      quantity,
+      address(1),
+      customInputIdOne
+    );
+    (uint256 ethPriceTwo, ) = additionalPrice.productPrice(
+      slicerId,
+      productId,
+      eth,
+      quantity,
+      address(1),
+      customInputIdTwo
+    );
+
+    assertEq(currencyPrice, 0);
+    assertEq(ethPrice, quantity * (basePrice + inputOneAddAmount));
+    assertEq(ethPriceTwo, quantity * (basePrice + inputTwoAddAmount));
   }
 }
