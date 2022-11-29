@@ -70,7 +70,7 @@ contract TestAdditionalPrice is Test {
   }
 
   /// @notice quantity is uint128, uint256 causes overflow error
-  /// @dev customInput 0 -> the base price is returned
+  /// @dev if customInput = 0 -> the base price is returned
   function testProductBasePriceEth(uint128 quantity) public {
     createPriceStrategy(Strategy.Custom, false);
     uint256 _choosenId = 0;
