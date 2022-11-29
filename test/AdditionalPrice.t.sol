@@ -18,15 +18,21 @@ contract TestAdditionalPrice is Test {
   uint256 basePrice = 1000;
   uint256 inputOneAddAmount = 100;
   uint256 inputTwoAddAmount = 200;
+  uint256 inputOnePercentage = 10;
+  uint256 inputTwoPercentage = 20;
 
   function createPriceStrategy(Strategy _strategy, bool _dependsOnQuantity) public {
     CurrencyAdditionalParams[] memory _currencyAdditionalParams = new CurrencyAdditionalParams[](2);
 
-    if (_strategy == Strategy.Custom) {
-      /// set product price with additional custom inputs
-      _currencyAdditionalParams[0] = CurrencyAdditionalParams(1, inputOneAddAmount);
-      _currencyAdditionalParams[1] = CurrencyAdditionalParams(2, inputTwoAddAmount);
-    } else if (_strategy == Strategy.Percentage) {}
+    /// set product price with additional custom inputs
+    _currencyAdditionalParams[0] = CurrencyAdditionalParams(
+      1,
+      _strategy == Strategy.Custom ? inputOneAddAmount : inputOnePercentage
+    );
+    _currencyAdditionalParams[1] = CurrencyAdditionalParams(
+      2,
+      _strategy == Strategy.Custom ? inputTwoAddAmount : inputTwoPercentage
+    );
 
     CurrenciesParams[] memory currenciesParams = new CurrenciesParams[](1);
     currenciesParams[0] = CurrenciesParams(
@@ -100,5 +106,33 @@ contract TestAdditionalPrice is Test {
 
     assertEq(currencyPrice, 0);
     assertEq(ethPrice, basePrice);
+  }
+
+  /// @dev Input 1: 10%, input 2: 20%
+  function testPercentageStrategy() public {
+    createPriceStrategy(Strategy.Percentage, false);
+    bytes memory customInputIdOne = abi.encodePacked(uint(1));
+    bytes memory customInputIdTwo = abi.encodePacked(uint(2));
+    uint256 quantity = 1;
+    (uint256 ethPrice, uint256 currencyPrice) = additionalPrice.productPrice(
+      slicerId,
+      productId,
+      eth,
+      quantity,
+      address(1),
+      customInputIdOne
+    );
+    (uint256 ethPriceTwo, ) = additionalPrice.productPrice(
+      slicerId,
+      productId,
+      eth,
+      quantity,
+      address(1),
+      customInputIdTwo
+    );
+
+    assertEq(currencyPrice, 0);
+    assertEq(ethPrice, quantity * basePrice + (basePrice * inputOnePercentage) / 100);
+    assertEq(ethPriceTwo, quantity * basePrice + (basePrice * inputTwoPercentage) / 100);
   }
 }

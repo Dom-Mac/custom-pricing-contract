@@ -196,7 +196,7 @@ contract AdditionalPrice is ISliceProductPrice {
     } else if (_strategy == Strategy.Percentage) {
       _strategyPrice = _dependsOnQuantity
         ? _basePrice * _quantity * (1 + _additionalPrice / 100)
-        : (_quantity + _additionalPrice / 100) * _basePrice;
+        : _quantity * _basePrice + (_basePrice * _additionalPrice) / 100;
     } else {
       _strategyPrice = _quantity * _basePrice;
     }
