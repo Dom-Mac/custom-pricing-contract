@@ -8,8 +8,8 @@ import './structs/CurrenciesParams.sol';
 
 /**
   @title Adjust product price based on custom input - Slice pricing strategy
+  @author Dom-Mac (ZeroHex)
   @author jj-ranalli
-  @author Dom-Mac
   @notice
   - On product creation the creator can choose different inputs and associated additional prices
   - Inherits `ISliceProductPrice` interface
